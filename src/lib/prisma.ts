@@ -1,17 +1,15 @@
-import { PrismaClient } from "@prisma/client"
+import { PrismaClient } from "@prisma/client";
 
 declare global {
-  // Prevent multiple instances of Prisma Client in dev
-  // (Next.js hot-reloading problem)
-  var prisma: PrismaClient | undefined
+  // allow global `var` to persist across hot reloads in dev
+  // eslint-disable-next-line no-var
+  var prisma: PrismaClient | undefined;
 }
 
 export const prisma =
   global.prisma ||
   new PrismaClient({
-    log: ["query"],
-  })
+    log: ["query"], // optional, useful for debugging
+  });
 
-if (process.env.NODE_ENV !== "production") {
-  global.prisma = prisma
-}
+if (process.env.NODE_ENV !== "production") global.prisma = prisma;
