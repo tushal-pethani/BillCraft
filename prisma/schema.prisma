@@ -23,6 +23,7 @@ model User {
   // Your app relations
   business      Business?
   invoices      Invoice[]
+  templates     InvoiceTemplate[]
 }
 
 model Account {
@@ -102,6 +103,9 @@ model Invoice {
   clientId  String
   client    Client   @relation(fields: [clientId], references: [id])
 
+  templateId String?
+  template   InvoiceTemplate? @relation(fields: [templateId], references: [id])
+
   items     InvoiceItem[]
 }
 
@@ -115,4 +119,43 @@ model InvoiceItem {
 
   invoiceId String
   invoice   Invoice  @relation(fields: [invoiceId], references: [id])
+}
+
+model InvoiceTemplate {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  
+  // Company logo (stored as URL or base64)
+  companyLogo String?
+  
+  // Tax settings
+  isTaxable   Boolean  @default(false)
+  cgstRate    Float?   // Central GST rate
+  sgstRate    Float?   // State GST rate
+  igstRate    Float?   // Integrated GST rate
+  
+  // Invoice numbering
+  invoiceNumberStart Int @default(1)
+  invoiceNumberPrefix String @default("INV")
+  
+  // PDF template selection
+  pdfTemplate String @default("classic") // "classic", "modern", "minimal", "creative"
+  
+  // Template settings
+  primaryColor String @default("#667eea")
+  secondaryColor String @default("#f7fafc")
+  fontFamily String @default("Inter")
+  
+  // Metadata
+  isDefault Boolean @default(false)
+  isActive Boolean @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relations
+  userId String
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  invoices Invoice[]
 }

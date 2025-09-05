@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Creative Invoice Template Preview</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Montserrat', 'Arial', sans-serif;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        .invoice-container {
+            max-width: 850px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.2);
+            position: relative;
+        }
+        
+        .invoice-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 8px;
+            background: linear-gradient(90deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4);
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 50px 40px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(180deg); }
+        }
+        
+        .company-name {
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            position: relative;
+            z-index: 1;
+        }
+        
+        .company-details {
+            opacity: 0.95;
+            font-size: 16px;
+            line-height: 1.8;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .content {
+            padding: 50px 40px;
+            background: white;
+        }
+        
+        .invoice-title {
+            font-size: 32px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #ff6b6b, #4ecdc4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-align: center;
+            margin-bottom: 40px;
+            position: relative;
+        }
+        
+        .invoice-title::after {
+            content: '';
+            position: absolute;
+            bottom: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 4px;
+            background: linear-gradient(135deg, #ff6b6b, #4ecdc4);
+            border-radius: 2px;
+        }
+        
+        .invoice-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 50px;
+            margin-bottom: 50px;
+        }
+        
+        .info-section {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            padding: 30px;
+            border-radius: 15px;
+            border-left: 5px solid #ff6b6b;
+        }
+        
+        .info-section h3 {
+            color: #333;
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        
+        .info-section p {
+            margin: 10px 0;
+            color: #555;
+            font-size: 15px;
+            line-height: 1.6;
+        }
+        
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 50px 0;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        
+        .items-table th {
+            background: linear-gradient(135deg, #ff6b6b 0%, #4ecdc4 100%);
+            color: white;
+            padding: 25px 20px;
+            text-align: left;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-size: 14px;
+        }
+        
+        .items-table td {
+            padding: 25px 20px;
+            border-bottom: 1px solid #f0f0f0;
+            color: #333;
+            font-size: 15px;
+        }
+        
+        .items-table tr:nth-child(even) {
+            background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+        }
+        
+        .items-table tr:hover {
+            background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
+            transform: scale(1.01);
+            transition: all 0.3s ease;
+        }
+        
+        .totals {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            border-radius: 20px;
+            margin-top: 40px;
+        }
+        
+        .total-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 15px 0;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+        }
+        
+        .total-label {
+            font-weight: 500;
+            font-size: 16px;
+        }
+        
+        .total-amount {
+            font-weight: 600;
+            font-size: 16px;
+        }
+        
+        .grand-total {
+            font-size: 24px;
+            font-weight: 700;
+            border-top: 3px solid rgba(255,255,255,0.5);
+            padding-top: 20px;
+            margin-top: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .payment-terms {
+            background: linear-gradient(135deg, #ff6b6b 0%, #4ecdc4 100%);
+            color: white;
+            padding: 35px;
+            border-radius: 20px;
+            margin: 40px 0;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .payment-terms::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: pulse 4s ease-in-out infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 0.8; }
+        }
+        
+        .payment-terms h4 {
+            margin-bottom: 20px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-size: 18px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .payment-terms p {
+            opacity: 0.95;
+            line-height: 1.8;
+            font-size: 16px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .footer {
+            text-align: center;
+            color: #666;
+            font-size: 14px;
+            margin-top: 50px;
+            padding-top: 30px;
+            border-top: 2px solid #f0f0f0;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #ff6b6b, #4ecdc4);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 25px;
+            font-size: 14px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 16px rgba(255,107,107,0.3);
+        }
+        
+        .creative-accent {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #ff6b6b, #4ecdc4);
+            border-radius: 50%;
+            opacity: 0.1;
+            animation: rotate 10s linear infinite;
+        }
+        
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="invoice-container">
+        <div class="creative-accent"></div>
+        
+        <div class="header">
+            <div class="company-name">Your Company Name</div>
+            <div class="company-details">
+                123 Business Street • City, State 12345<br>
+                Phone: (555) 123-4567 • Email: info@yourcompany.com
+            </div>
+        </div>
+        
+        <div class="content">
+            <div class="status-badge">Invoice</div>
+            
+            <div class="invoice-title">Invoice</div>
+            
+            <div class="invoice-details">
+                <div class="info-section">
+                    <h3>Invoice Details</h3>
+                    <p><strong>Invoice #:</strong> INV-001</p>
+                    <p><strong>Date:</strong> January 15, 2024</p>
+                    <p><strong>Due Date:</strong> February 15, 2024</p>
+                </div>
+                <div class="info-section">
+                    <h3>Bill To</h3>
+                    <p><strong>Client Name</strong></p>
+                    <p>123 Client Street</p>
+                    <p>Client City, State 12345</p>
+                    <p>client@email.com</p>
+                </div>
+            </div>
+            
+            <table class="items-table">
+                <thead>
+                    <tr>
+                        <th>Description</th>
+                        <th>Quantity</th>
+                        <th>Rate</th>
+                        <th>Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Web Development Services</td>
+                        <td>40</td>
+                        <td>$75.00</td>
+                        <td>$3,000.00</td>
+                    </tr>
+                    <tr>
+                        <td>UI/UX Design</td>
+                        <td>20</td>
+                        <td>$100.00</td>
+                        <td>$2,000.00</td>
+                    </tr>
+                    <tr>
+                        <td>Project Management</td>
+                        <td>10</td>
+                        <td>$50.00</td>
+                        <td>$500.00</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <div class="totals">
+                <div class="total-row">
+                    <div class="total-label">Subtotal:</div>
+                    <div class="total-amount">$5,500.00</div>
+                </div>
+                <div class="total-row">
+                    <div class="total-label">Tax (10%):</div>
+                    <div class="total-amount">$550.00</div>
+                </div>
+                <div class="total-row grand-total">
+                    <div class="total-label">Total:</div>
+                    <div class="total-amount">$6,050.00</div>
+                </div>
+            </div>
+            
+            <div class="payment-terms">
+                <h4>Payment Terms</h4>
+                <p>Payment is due within 30 days of invoice date. Late payments may be subject to a 1.5% monthly service charge.</p>
+            </div>
+            
+            <div class="footer">
+                <p>Thank you for your business!</p>
+                <p>This invoice was generated on January 15, 2024</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

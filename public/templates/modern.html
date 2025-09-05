@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modern Invoice Template Preview</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .invoice-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+        
+        .company-name {
+            font-size: 32px;
+            font-weight: 300;
+            margin-bottom: 10px;
+            letter-spacing: 1px;
+        }
+        
+        .company-details {
+            opacity: 0.9;
+            font-size: 14px;
+            line-height: 1.8;
+        }
+        
+        .content {
+            padding: 40px;
+        }
+        
+        .invoice-title {
+            font-size: 28px;
+            font-weight: 300;
+            color: #333;
+            margin-bottom: 30px;
+            text-align: center;
+            position: relative;
+        }
+        
+        .invoice-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 3px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 2px;
+        }
+        
+        .invoice-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+        
+        .info-section h3 {
+            color: #667eea;
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .info-section p {
+            margin: 8px 0;
+            color: #666;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 40px 0;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .items-table th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px 15px;
+            text-align: left;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 12px;
+        }
+        
+        .items-table td {
+            padding: 20px 15px;
+            border-bottom: 1px solid #f0f0f0;
+            color: #333;
+        }
+        
+        .items-table tr:nth-child(even) {
+            background-color: #fafafa;
+        }
+        
+        .items-table tr:hover {
+            background-color: #f5f5f5;
+        }
+        
+        .totals {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            padding: 30px;
+            border-radius: 12px;
+            margin-top: 30px;
+        }
+        
+        .total-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 12px 0;
+            padding: 8px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .total-label {
+            font-weight: 500;
+            color: #666;
+        }
+        
+        .total-amount {
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .grand-total {
+            font-size: 20px;
+            font-weight: 700;
+            color: #667eea;
+            border-top: 2px solid #667eea;
+            padding-top: 15px;
+            margin-top: 15px;
+        }
+        
+        .payment-terms {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 12px;
+            margin: 30px 0;
+        }
+        
+        .payment-terms h4 {
+            margin-bottom: 15px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .payment-terms p {
+            opacity: 0.9;
+            line-height: 1.6;
+        }
+        
+        .footer {
+            text-align: center;
+            color: #999;
+            font-size: 14px;
+            margin-top: 40px;
+            padding-top: 30px;
+            border-top: 1px solid #f0f0f0;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="invoice-container">
+        <div class="header">
+            <div class="company-name">Your Company Name</div>
+            <div class="company-details">
+                123 Business Street • City, State 12345<br>
+                Phone: (555) 123-4567 • Email: info@yourcompany.com
+            </div>
+        </div>
+        
+        <div class="content">
+            <div class="status-badge">Invoice</div>
+            
+            <div class="invoice-title">Invoice</div>
+            
+            <div class="invoice-details">
+                <div class="info-section">
+                    <h3>Invoice Details</h3>
+                    <p><strong>Invoice #:</strong> INV-001</p>
+                    <p><strong>Date:</strong> January 15, 2024</p>
+                    <p><strong>Due Date:</strong> February 15, 2024</p>
+                </div>
+                <div class="info-section">
+                    <h3>Bill To</h3>
+                    <p><strong>Client Name</strong></p>
+                    <p>123 Client Street</p>
+                    <p>Client City, State 12345</p>
+                    <p>client@email.com</p>
+                </div>
+            </div>
+            
+            <table class="items-table">
+                <thead>
+                    <tr>
+                        <th>Description</th>
+                        <th>Quantity</th>
+                        <th>Rate</th>
+                        <th>Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Web Development Services</td>
+                        <td>40</td>
+                        <td>$75.00</td>
+                        <td>$3,000.00</td>
+                    </tr>
+                    <tr>
+                        <td>UI/UX Design</td>
+                        <td>20</td>
+                        <td>$100.00</td>
+                        <td>$2,000.00</td>
+                    </tr>
+                    <tr>
+                        <td>Project Management</td>
+                        <td>10</td>
+                        <td>$50.00</td>
+                        <td>$500.00</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <div class="totals">
+                <div class="total-row">
+                    <div class="total-label">Subtotal:</div>
+                    <div class="total-amount">$5,500.00</div>
+                </div>
+                <div class="total-row">
+                    <div class="total-label">Tax (10%):</div>
+                    <div class="total-amount">$550.00</div>
+                </div>
+                <div class="total-row grand-total">
+                    <div class="total-label">Total:</div>
+                    <div class="total-amount">$6,050.00</div>
+                </div>
+            </div>
+            
+            <div class="payment-terms">
+                <h4>Payment Terms</h4>
+                <p>Payment is due within 30 days of invoice date. Late payments may be subject to a 1.5% monthly service charge.</p>
+            </div>
+            
+            <div class="footer">
+                <p>Thank you for your business!</p>
+                <p>This invoice was generated on January 15, 2024</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
