@@ -49,22 +49,30 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "User not found" }, { status: 404 })
     }
 
-    const body = await request.json()
-    const {
-      name,
-      description,
-      companyLogo,
-      isTaxable,
-      cgstRate,
-      sgstRate,
-      igstRate,
-      invoiceNumberStart,
-      invoiceNumberPrefix,
-      pdfTemplate,
-      primaryColor,
-      secondaryColor,
-      fontFamily
-    } = body
+    const formData = await request.formData()
+    
+    // Extract form data with proper typing
+    const name = formData.get('name') as string
+    const description = formData.get('description') as string | null
+    const isTaxable = formData.get('isTaxable') as string
+    const cgstRate = formData.get('cgstRate') as string
+    const sgstRate = formData.get('sgstRate') as string
+    const igstRate = formData.get('igstRate') as string
+    const invoiceNumberStart = formData.get('invoiceNumberStart') as string
+    const invoiceNumberPrefix = formData.get('invoiceNumberPrefix') as string
+    const pdfTemplate = formData.get('pdfTemplate') as string
+    const primaryColor = formData.get('primaryColor') as string
+    const secondaryColor = formData.get('secondaryColor') as string
+    const fontFamily = formData.get('fontFamily') as string
+
+    // Handle file upload for company logo
+    const companyLogoFile = formData.get('companyLogo') as File | null
+    let companyLogoUrl = null
+    
+    if (companyLogoFile && companyLogoFile.size > 0) {
+      // For now, we'll store the file name. In production, you'd upload to cloud storage
+      companyLogoUrl = companyLogoFile.name
+    }
 
     // Validate required fields
     if (!name) {
@@ -76,12 +84,12 @@ export async function POST(request: NextRequest) {
       data: {
         name,
         description: description || null,
-        companyLogo: companyLogo || null,
-        isTaxable: isTaxable || false,
-        cgstRate: isTaxable ? (cgstRate || 0) : null,
-        sgstRate: isTaxable ? (sgstRate || 0) : null,
-        igstRate: isTaxable ? (igstRate || 0) : null,
-        invoiceNumberStart: invoiceNumberStart || 1,
+        companyLogo: companyLogoUrl,
+        isTaxable: isTaxable === 'true',
+        cgstRate: isTaxable === 'true' ? parseFloat(cgstRate) || 0 : null,
+        sgstRate: isTaxable === 'true' ? parseFloat(sgstRate) || 0 : null,
+        igstRate: isTaxable === 'true' ? parseFloat(igstRate) || 0 : null,
+        invoiceNumberStart: parseInt(invoiceNumberStart) || 1,
         invoiceNumberPrefix: invoiceNumberPrefix || "INV",
         pdfTemplate: pdfTemplate || "classic",
         primaryColor: primaryColor || "#667eea",

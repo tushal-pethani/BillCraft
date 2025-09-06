@@ -82,6 +82,7 @@ model Client {
   name      String
   address   String?
   state     String?
+  gstData   Json?     // Store additional GST validation data
 
   businessId String
   business   Business @relation(fields: [businessId], references: [id])
