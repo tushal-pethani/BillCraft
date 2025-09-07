@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
-import AppLayout from "@/app/components/AppLayout"
+// Removed local AppLayout to use GlobalNavbar layout
 
 interface InvoiceTemplate {
   id: string
@@ -83,10 +83,7 @@ export default function InvoiceDesignPage() {
   }
 
   return (
-    <AppLayout 
-      pageTitle="Invoice Design" 
-      pageDescription="Customize your invoice templates and branding"
-    >
+    <>
           {/* Templates Section */}
           <div className="mb-8">
             <div className="flex justify-between items-center mb-6">
@@ -182,7 +179,7 @@ export default function InvoiceDesignPage() {
 
           {/* Create Template Modal */}
           {showCreateForm && (
-            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="fixed inset-0 bg-black/50 bg-opacity-50 flex items-center justify-center z-50">
               <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-6xl w-full mx-4 max-h-[90vh] overflow-y-auto">
                 <CreateTemplateForm 
                   onClose={() => setShowCreateForm(false)}
@@ -268,7 +265,7 @@ export default function InvoiceDesignPage() {
               </div>
             </div>
           )}
-    </AppLayout>
+    </>
   )
 }
 

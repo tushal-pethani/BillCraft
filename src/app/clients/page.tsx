@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
-import AppLayout from "@/app/components/AppLayout"
+// Removed local AppLayout to use GlobalNavbar layout
 
 interface Client {
   id: string
@@ -136,10 +136,7 @@ export default function ClientsPage() {
   }
 
   return (
-    <AppLayout 
-      pageTitle="Clients" 
-      pageDescription="Manage your client relationships"
-    >
+    <>
       {/* Header with Add Client Button */}
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-200">Clients</h1>
@@ -162,7 +159,7 @@ export default function ClientsPage() {
 
       {/* Add Client Modal */}
       {showAddForm && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black/50 bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full mx-4 p-6">
             <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">
               Add New Client
@@ -344,6 +341,6 @@ export default function ClientsPage() {
           </div>
         </div>
       )}
-    </AppLayout>
+    </>
   )
 }

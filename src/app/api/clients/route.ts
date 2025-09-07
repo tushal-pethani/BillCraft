@@ -31,7 +31,9 @@ export async function GET() {
       return NextResponse.json({ error: "Business not found" }, { status: 404 })
     }
 
-    return NextResponse.json({ clients: user.business.clients })
+    const res = NextResponse.json({ clients: user.business.clients })
+    res.headers.set('Cache-Control', 'no-store')
+    return res
   } catch (error) {
     console.error("Error fetching clients:", error)
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })

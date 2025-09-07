@@ -3,19 +3,16 @@
 import Link from "next/link"
 import { useSession } from "next-auth/react"
 import { usePathname } from "next/navigation"
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect, useRef, ReactNode } from "react"
 import DarkModeToggle from "./DarkModeToggle"
 import LogoutButton from "./LogoutButton"
+import { SWRConfig } from 'swr'
 
-export default function GlobalNavbar() {
+export default function GlobalNavbar({ children }: { children: ReactNode }) {
   const { data: session } = useSession()
   const pathname = usePathname()
   const [showDropdown, setShowDropdown] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
-
-  if (!session) {
-    return null // Don't show navbar for unauthenticated users
-  }
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -31,9 +28,18 @@ export default function GlobalNavbar() {
     }
   }, [])
 
+  // Do not render navbar on auth routes
+  if (pathname === "/login" || pathname === "/signup") {
+    return <>{children}</>
+  }
+
+  if (!session) {
+    return <>{children}</> // Don't show navbar for unauthenticated users
+  }
+
   const navigationItems = [
     {
-      href: "/dashboard",
+      href: "/invoices",
       label: "Invoices",
       icon: (
         <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -62,9 +68,6 @@ export default function GlobalNavbar() {
   ]
 
   const isActive = (href: string) => {
-    if (href === "/dashboard") {
-      return pathname === "/dashboard" || pathname === "/invoices" || pathname.startsWith("/invoices/")
-    }
     return pathname === href || pathname.startsWith(href + "/")
   }
 
@@ -73,7 +76,10 @@ export default function GlobalNavbar() {
       {/* Sidebar */}
       <div className="fixed inset-y-0 left-0 w-64 bg-white dark:bg-gray-800 shadow-lg">
         <div className="p-6">
-          <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-200 mb-8">BillCraft</h1>
+          <div className="flex items-center mb-8">
+            <img src="/file.svg" alt="BillCraft Logo" className="mr-2 w-7 h-7" />
+            <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-200">BillCraft</h1>
+          </div>
           
           {/* Navigation */}
           <nav className="space-y-2">
@@ -174,7 +180,9 @@ export default function GlobalNavbar() {
 
         {/* Page Content */}
         <div className="p-8">
-          {/* This will be replaced by the actual page content */}
+          <SWRConfig key={(session.user as any)?.id || 'anon'} value={{ provider: () => new Map() }}>
+            {children}
+          </SWRConfig>
         </div>
       </div>
     </div>

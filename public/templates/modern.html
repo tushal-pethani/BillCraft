@@ -209,10 +209,10 @@
 <body>
     <div class="invoice-container">
         <div class="header">
-            <div class="company-name">Your Company Name</div>
+            <div class="company-name">{{companyName}}</div>
             <div class="company-details">
-                123 Business Street • City, State 12345<br>
-                Phone: (555) 123-4567 • Email: info@yourcompany.com
+                {{companyAddress}} • {{companyCityState}}<br>
+                Phone: {{companyPhone}} • Email: {{companyEmail}}
             </div>
         </div>
         
@@ -224,16 +224,13 @@
             <div class="invoice-details">
                 <div class="info-section">
                     <h3>Invoice Details</h3>
-                    <p><strong>Invoice #:</strong> INV-001</p>
-                    <p><strong>Date:</strong> January 15, 2024</p>
-                    <p><strong>Due Date:</strong> February 15, 2024</p>
+                    <p><strong>Invoice #:</strong> {{invoiceNo}}</p>
+                    <p><strong>Date:</strong> {{date}}</p>
                 </div>
                 <div class="info-section">
                     <h3>Bill To</h3>
-                    <p><strong>Client Name</strong></p>
-                    <p>123 Client Street</p>
-                    <p>Client City, State 12345</p>
-                    <p>client@email.com</p>
+                    <p><strong>{{clientName}}</strong></p>
+                    <p>{{clientAddress}}</p>
                 </div>
             </div>
             
@@ -247,39 +244,22 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td>Web Development Services</td>
-                        <td>40</td>
-                        <td>$75.00</td>
-                        <td>$3,000.00</td>
-                    </tr>
-                    <tr>
-                        <td>UI/UX Design</td>
-                        <td>20</td>
-                        <td>$100.00</td>
-                        <td>$2,000.00</td>
-                    </tr>
-                    <tr>
-                        <td>Project Management</td>
-                        <td>10</td>
-                        <td>$50.00</td>
-                        <td>$500.00</td>
-                    </tr>
+                    {{itemsRows}}
                 </tbody>
             </table>
             
             <div class="totals">
                 <div class="total-row">
                     <div class="total-label">Subtotal:</div>
-                    <div class="total-amount">$5,500.00</div>
+                    <div class="total-amount">₹{{subtotal}}</div>
                 </div>
                 <div class="total-row">
-                    <div class="total-label">Tax (10%):</div>
-                    <div class="total-amount">$550.00</div>
+                    <div class="total-label">Tax:</div>
+                    <div class="total-amount">₹{{taxAmount}}</div>
                 </div>
                 <div class="total-row grand-total">
                     <div class="total-label">Total:</div>
-                    <div class="total-amount">$6,050.00</div>
+                    <div class="total-amount">₹{{total}}</div>
                 </div>
             </div>
             
@@ -290,7 +270,7 @@
             
             <div class="footer">
                 <p>Thank you for your business!</p>
-                <p>This invoice was generated on January 15, 2024</p>
+                <p>Generated on {{date}}</p>
             </div>
         </div>
     </div>

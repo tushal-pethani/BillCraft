@@ -1,16 +1,24 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { signIn } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import Head from "next/head"
+import { useSession } from "next-auth/react"
 
 export default function LoginPage() {
   const router = useRouter()
+  const { data: session } = useSession()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
+
+  useEffect(() => {
+    if (session) {
+      router.push("/dashboard")
+    }
+  }, [session, router])
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -26,7 +34,7 @@ export default function LoginPage() {
     if (res?.error) {
       setError(res.error)
     } else {
-      router.push("/dashboard")
+      router.push("/invoices")
     }
     setLoading(false)
   }

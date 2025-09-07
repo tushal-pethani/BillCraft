@@ -11,6 +11,8 @@ model User {
   id            String   @id @default(cuid())
   name          String?
   email         String   @unique
+  image         String?
+  emailVerified DateTime?
   password      String?  // null if user logs in with Google
   provider      String   @default("credentials") // "google" | "credentials"
   createdAt     DateTime @default(now())
@@ -97,6 +99,20 @@ model Invoice {
   amount      Float
   taxAmount   Float
   totalAmount Float
+  note        String?
+
+  // When true, use manual GST values below instead of template GST
+  useManualGst Boolean   @default(false)
+  manualCgst    Float?
+  manualSgst    Float?
+  manualIgst    Float?
+
+  // Persisted PDF of this invoice. Use bytea in Postgres
+  pdfData     Bytes?
+
+  // Payment status
+  status     String   @default("UNPAID") // UNPAID | PAID
+  paidAt     DateTime?
 
   userId    String
   user      User     @relation(fields: [userId], references: [id])

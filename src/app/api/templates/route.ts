@@ -25,7 +25,9 @@ export async function GET() {
       return NextResponse.json({ error: "User not found" }, { status: 404 })
     }
 
-    return NextResponse.json({ templates: user.templates })
+    const res = NextResponse.json({ templates: user.templates })
+    res.headers.set('Cache-Control', 'no-store')
+    return res
   } catch (error) {
     console.error("Error fetching templates:", error)
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })

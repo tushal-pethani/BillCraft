@@ -44,6 +44,23 @@ export const authOptions = {
     signIn: "/login", // custom login page
   },
   callbacks: {
+    async redirect({ url, baseUrl }) {
+      // Force authenticated users to the dashboard unless an explicit safe relative path is provided
+      try {
+        const parsed = new URL(url, baseUrl)
+        const path = parsed.pathname
+        // Avoid looping back to auth pages
+        if (path === "/login" || path === "/signup" || path === "/") {
+          return `${baseUrl}/dashboard`
+        }
+        // Allow internal (same-origin) relative or absolute URLs
+        if (parsed.origin === baseUrl) {
+          return parsed.href
+        }
+      } catch {}
+      // Fallback
+      return `${baseUrl}/dashboard`
+    },
     async session({ session, token }) {
       if (token.sub) {
         session.user.id = token.sub;
