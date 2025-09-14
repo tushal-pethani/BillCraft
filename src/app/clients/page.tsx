@@ -13,8 +13,8 @@ interface Client {
   name: string
   address: string | null
   state: string | null
-  gstData: any
-  invoices: any[]
+  gstData: Record<string, unknown>
+  invoices: { id: string; amount: number; date: string }[]
 }
 
 export default function ClientsPage() {
@@ -26,14 +26,14 @@ export default function ClientsPage() {
   const [gstNumber, setGstNumber] = useState('')
   const [deletingClient, setDeletingClient] = useState<Client | null>(null)
 
+  // Use optimized data hooks with caching
+  const { clients, isLoading: clientsLoading, mutate: mutateClients } = useClients()
+  const { business, isLoading: businessLoading } = useBusiness()
+
   if (!session) {
     router.push("/") // redirect to signup/login if not logged in
     return null
   }
-
-  // Use optimized data hooks with caching
-  const { clients, isLoading: clientsLoading, mutate: mutateClients } = useClients()
-  const { business, isLoading: businessLoading } = useBusiness()
   
   const hasBusiness = business !== null
 
@@ -158,7 +158,7 @@ export default function ClientsPage() {
                   placeholder="Enter GST number (e.g., 23AAACR5055K2ZE)"
                 />
                 <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                  We'll validate the GST number and fetch company details automatically
+                  We&apos;ll validate the GST number and fetch company details automatically
                 </p>
               </div>
 
@@ -212,7 +212,7 @@ export default function ClientsPage() {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {clients.map((client) => (
+          {clients.map((client: Client) => (
             <div 
               key={client.id} 
               className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow cursor-pointer"
@@ -255,8 +255,8 @@ export default function ClientsPage() {
                     <span className="font-medium">State:</span> {client.state || 'Not available'}
                   </p>
                   <div className="flex items-center justify-between">
-                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(client.gstData?.status)}`}>
-                      {client.gstData?.status || 'Unknown'}
+                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(client.gstData?.status as string)}`}>
+                      {String(client.gstData?.status || 'Unknown')}
                     </span>
                     <span className="text-sm text-gray-600 dark:text-gray-400">
                       {client.invoices?.length || 0} invoices
@@ -281,7 +281,7 @@ export default function ClientsPage() {
               Delete Client
             </h3>
             <p className="text-gray-600 dark:text-gray-400 mb-6">
-              Are you sure you want to delete "{deletingClient.name}"? This action cannot be undone.
+              Are you sure you want to delete &quot;{deletingClient.name}&quot;? This action cannot be undone.
               <br />
               <span className="text-sm text-gray-500 dark:text-gray-500">
                 Note: Invoices for this client will not be deleted.
