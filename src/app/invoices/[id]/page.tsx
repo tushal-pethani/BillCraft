@@ -7,7 +7,7 @@ interface InvoicePageProps {
   params: { id: string }
 }
 
-export default function InvoiceDetailPage({ params }: InvoicePageProps) {
+export default function InvoiceDetailPage({ params }: { params: { id: string } }) {
   const router = useRouter()
   const search = useSearchParams()
   const [loading, setLoading] = useState(true)
