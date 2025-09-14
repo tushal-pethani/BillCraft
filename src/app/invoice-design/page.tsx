@@ -37,13 +37,13 @@ export default function InvoiceDesignPage() {
   const [editingTemplate, setEditingTemplate] = useState<InvoiceTemplate | null>(null)
   const [deletingTemplate, setDeletingTemplate] = useState<InvoiceTemplate | null>(null)
 
+  // Use optimized data hooks with caching
+  const { templates, isLoading: templatesLoading, mutate: mutateTemplates } = useTemplates()
+
   if (!session) {
     router.push("/") // redirect to signup/login if not logged in
     return null
   }
-
-  // Use optimized data hooks with caching
-  const { templates, isLoading: templatesLoading, mutate: mutateTemplates } = useTemplates()
 
   const showTemplatePreview = (templateId: string) => {
     setPreviewTemplate(templateId)
@@ -96,7 +96,7 @@ export default function InvoiceDesignPage() {
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {templates.map((template) => (
+                {templates.map((template: InvoiceTemplate) => (
                   <div key={template.id} className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow">
                     <div className="p-6">
                       <div className="flex justify-between items-start mb-4">
@@ -208,7 +208,7 @@ export default function InvoiceDesignPage() {
                   Delete Template
                 </h3>
                 <p className="text-gray-600 dark:text-gray-400 mb-6">
-                  Are you sure you want to delete "{deletingTemplate.name}"? This action cannot be undone.
+                  Are you sure you want to delete &quot;{deletingTemplate.name}&quot;? This action cannot be undone.
                 </p>
                 <div className="flex space-x-4">
                   <button
@@ -376,6 +376,7 @@ function CreateTemplateForm({ onClose, onSuccess }: { onClose: () => void, onSuc
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Template Name *</label>
               <input
+                title="Upload your company logo"
                 type="text"
                 value={formData.name}
                 onChange={(e) => setFormData({...formData, name: e.target.value})}
@@ -409,6 +410,7 @@ function CreateTemplateForm({ onClose, onSuccess }: { onClose: () => void, onSuc
                       type="button"
                       onClick={removeLogo}
                       className="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 text-sm"
+                      title="Remove logo"
                     >
                       Remove
                     </button>
