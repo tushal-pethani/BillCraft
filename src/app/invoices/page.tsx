@@ -23,13 +23,13 @@ export default function InvoicesPage() {
   }
 
   // Use optimized data hooks with caching
-  const { invoices, isLoading: invoicesLoading, error: invoicesError } = useInvoices()
+  const { invoices, isLoading: invoicesLoading, error: invoicesError } = useInvoices() as { invoices: Array<{ id: string; invoiceNo: string; client?: { name?: string; gstNumber?: string }; clientId: string; status?: string; date: string; totalAmount: number }>, isLoading: boolean, error: any }
   const { clients, isLoading: clientsLoading } = useClients()
   
   const loading = invoicesLoading || clientsLoading
   const error = invoicesError ? (invoicesError as any).message : null
 
-  const filtered = invoices.filter((inv) => {
+  const filtered = invoices.filter((inv: { id: string; invoiceNo: string; client?: { name?: string; gstNumber?: string }; clientId: string; status?: string; date: string; totalAmount: number }) => {
     const text = filterText.toLowerCase()
     const matchesText = !text ||
       `${inv.invoiceNo}`.includes(text) ||

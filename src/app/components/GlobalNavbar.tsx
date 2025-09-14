@@ -180,7 +180,7 @@ export default function GlobalNavbar({ children }: { children: ReactNode }) {
 
         {/* Page Content */}
         <div className="p-8">
-          <SWRConfig key={(session.user as any)?.id || 'anon'} value={{ provider: () => new Map() }}>
+          <SWRConfig key={(session.user as { id?: string })?.id || 'anon'} value={{ provider: () => new Map() }}>
             {children}
           </SWRConfig>
         </div>

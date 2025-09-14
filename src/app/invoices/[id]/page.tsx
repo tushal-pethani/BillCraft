@@ -11,7 +11,12 @@ export default function InvoiceDetailPage() {
 
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [invoice, setInvoice] = useState<any | null>(null)
+  interface Invoice {
+    id: string
+    [key: string]: string | number | boolean // Adjust fields as per your invoice structure
+  }
+
+  const [invoice, setInvoice] = useState<Invoice | null>(null)
   const iframeRef = useRef<HTMLIFrameElement>(null)
 
   useEffect(() => {
@@ -22,11 +27,15 @@ export default function InvoiceDetailPage() {
         const res = await fetch(`/api/invoices`)
         if (!res.ok) throw new Error("Failed to load invoice")
         const data = await res.json()
-        const inv = (data.invoices || []).find((i: any) => i.id === id)
-        if (!inv) throw new Error("Invoice not found")
-        setInvoice(inv)
-      } catch (e: any) {
-        setError(e.message || "Error loading invoice")
+        const invoice = (data.invoices || []).find((i: Invoice) => i.id === id)
+        if (!invoice) throw new Error("Invoice not found")
+        setInvoice(invoice)
+      } catch (e: unknown) {
+        if (e instanceof Error) {
+          setError(e.message)
+        } else {
+          setError("Error loading invoice")
+        }
       } finally {
         setLoading(false)
       }
