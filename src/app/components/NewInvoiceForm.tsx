@@ -23,13 +23,13 @@ export default function NewInvoiceForm({ onCreated, onCancel }: { onCreated?: (i
   const [error, setError] = useState<string | null>(null)
 
   // Use optimized data hooks with caching
-  const { clients } = useClients()
+  const { clients }: { clients: Client[] } = useClients()
   const { templates } = useTemplates()
 
   const subtotal = useMemo(() => items.reduce((s, it) => s + Number(it.quantity || 0) * Number(it.rate || 0), 0), [items])
   const gstRates = useMemo(() => {
     if (useManualGst) return { cgst: manualCgst, sgst: manualSgst, igst: manualIgst }
-    const tpl = templates.find(t => t.id === templateId)
+    const tpl = templates.find((t: Template) => t.id === templateId)
     if (tpl && tpl.isTaxable) return { cgst: tpl.cgstRate || 0, sgst: tpl.sgstRate || 0, igst: tpl.igstRate || 0 }
     return { cgst: 0, sgst: 0, igst: 0 }
   }, [useManualGst, manualCgst, manualSgst, manualIgst, templates, templateId])
@@ -69,8 +69,12 @@ export default function NewInvoiceForm({ onCreated, onCancel }: { onCreated?: (i
       const data = await res.json()
       invalidateInvoices() // Refresh invoices cache
       onCreated ? onCreated(data.invoice.id) : router.push(`/invoices/${data.invoice.id}`)
-    } catch (e: any) {
-      setError(e.message || "Error creating invoice")
+    } catch (e: unknown) {
+      if (e instanceof Error) {
+        setError(e.message)
+      } else {
+        setError("Error creating invoice")
+      }
     } finally {
       setSubmitting(false)
     }
@@ -82,11 +86,11 @@ export default function NewInvoiceForm({ onCreated, onCancel }: { onCreated?: (i
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Bill Date</label>
-          <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="w-full px-3 py-2 border rounded bg-white dark:bg-gray-900 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-gray-100" />
+          <input type="date" value={date} onChange={(e) => setDate(e.target.value)} title="Select bill date" placeholder="YYYY-MM-DD" className="w-full px-3 py-2 border rounded bg-white dark:bg-gray-900 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-gray-100" />
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Client</label>
-          <select value={clientId} onChange={(e) => setClientId(e.target.value)} className="w-full px-3 py-2 border rounded bg-white dark:bg-gray-900 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-gray-100">
+          <select title="Client selection" value={clientId} onChange={(e) => setClientId(e.target.value)} className="w-full px-3 py-2 border rounded bg-white dark:bg-gray-900 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-gray-100">
             <option value="">Select client</option>
             {clients.map(c => (
               <option key={c.id} value={c.id}>{c.name} {c.gstNumber ? `(${c.gstNumber})` : ""}</option>
@@ -95,9 +99,9 @@ export default function NewInvoiceForm({ onCreated, onCancel }: { onCreated?: (i
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Template</label>
-          <select value={templateId} onChange={(e) => setTemplateId(e.target.value)} className="w-full px-3 py-2 border rounded bg-white dark:bg-gray-900 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-gray-100">
+          <select title="Template selection" value={templateId} onChange={(e) => setTemplateId(e.target.value)} className="w-full px-3 py-2 border rounded bg-white dark:bg-gray-900 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-gray-100">
             <option value="">Default (classic)</option>
-            {templates.map(t => (
+            {templates.map((t: Template) => (
               <option key={t.id} value={t.id}>{t.name}</option>
             ))}
           </select>
@@ -112,7 +116,7 @@ export default function NewInvoiceForm({ onCreated, onCancel }: { onCreated?: (i
         <div className="space-y-2">
           {items.map((row, idx) => (
             <div key={idx} className="grid grid-cols-12 gap-2 items-center">
-              <input value={row.name} onChange={(e) => updateItem(idx, { name: e.target.value })} placeholder="Item name" className="col-span-6 px-3 py-2 border rounded bg-white dark:bg-gray-900 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-gray-100" />
+              <input value={row.name} onChange={(e) => updateItem(idx, { name: e.target.value })} title="Item name" placeholder="Item name" className="col-span-6 px-3 py-2 border rounded bg-white dark:bg-gray-900 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-gray-100" />
               <input type="number" value={row.quantity} onChange={(e) => updateItem(idx, { quantity: Number(e.target.value) })} placeholder="Qty" className="col-span-2 px-3 py-2 border rounded bg-white dark:bg-gray-900 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-gray-100" />
               <input type="number" value={row.rate} onChange={(e) => updateItem(idx, { rate: Number(e.target.value) })} placeholder="Rate" className="col-span-2 px-3 py-2 border rounded bg-white dark:bg-gray-900 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-gray-100" />
               <div className="col-span-1 text-sm text-gray-700 dark:text-gray-300">₹{(Number(row.quantity)*Number(row.rate)).toFixed(2)}</div>
@@ -130,7 +134,7 @@ export default function NewInvoiceForm({ onCreated, onCancel }: { onCreated?: (i
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
-            <input type="checkbox" checked={useManualGst} onChange={(e) => setUseManualGst(e.target.checked)} />
+            <input type="checkbox" checked={useManualGst} onChange={(e) => setUseManualGst(e.target.checked)} title="Enter GST manually" />
             Enter GST manually
           </label>
           {useManualGst && (
