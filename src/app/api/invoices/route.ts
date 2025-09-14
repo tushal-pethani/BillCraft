@@ -6,6 +6,57 @@ import fs from "fs/promises"
 import path from "path"
 import puppeteer from "puppeteer"
 
+// Function to convert number to words
+function numberToWords(num: number): string {
+  const ones = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine']
+  const teens = ['Ten', 'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen']
+  const tens = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety']
+  
+  function convertHundreds(n: number): string {
+    let result = ''
+    if (n > 99) {
+      result += ones[Math.floor(n / 100)] + ' Hundred '
+      n %= 100
+    }
+    if (n > 19) {
+      result += tens[Math.floor(n / 10)] + ' '
+      n %= 10
+    } else if (n > 9) {
+      result += teens[n - 10] + ' '
+      return result
+    }
+    if (n > 0) {
+      result += ones[n] + ' '
+    }
+    return result
+  }
+  
+  if (num === 0) return 'Zero'
+  
+  let result = ''
+  const crores = Math.floor(num / 10000000)
+  if (crores > 0) {
+    result += convertHundreds(crores) + 'Crore '
+  }
+  
+  const lakhs = Math.floor((num % 10000000) / 100000)
+  if (lakhs > 0) {
+    result += convertHundreds(lakhs) + 'Lakh '
+  }
+  
+  const thousands = Math.floor((num % 100000) / 1000)
+  if (thousands > 0) {
+    result += convertHundreds(thousands) + 'Thousand '
+  }
+  
+  const hundreds = num % 1000
+  if (hundreds > 0) {
+    result += convertHundreds(hundreds)
+  }
+  
+  return result.trim() + ' Rupees Only'
+}
+
 async function renderTemplateToHtml(templateKey: string, data: any): Promise<string> {
   const templateFile = path.join(process.cwd(), "public", "templates", `${templateKey}.html`)
   const html = await fs.readFile(templateFile, "utf8")
@@ -15,10 +66,12 @@ async function renderTemplateToHtml(templateKey: string, data: any): Promise<str
   if (Array.isArray(data.itemsRows)) {
     const rows = data.itemsRows.map((row: any) => `
                 <tr>
+                    <td>${row.srNo || ''}</td>
                     <td>${String(row.description)}</td>
                     <td>${Number(row.quantity)}</td>
                     <td>₹${Number(row.rate).toFixed(2)}</td>
                     <td>₹${Number(row.amount).toFixed(2)}</td>
+                    <td>${row.gstRate || ''}%</td>
                 </tr>`).join("\n")
     rendered = rendered.replace(/{{\s*itemsRows\s*}}/g, rows)
   }
@@ -26,10 +79,12 @@ async function renderTemplateToHtml(templateKey: string, data: any): Promise<str
   if (Array.isArray(data.itemsRows)) {
     const rowsMinimal = data.itemsRows.map((row: any) => `
             <div class="item-row">
+                <div class="item-srno">${row.srNo || ''}</div>
                 <div class="item-description">${String(row.description)}</div>
                 <div class="item-quantity">${Number(row.quantity)}</div>
                 <div class="item-rate">₹${Number(row.rate).toFixed(2)}</div>
                 <div class="item-amount">₹${Number(row.amount).toFixed(2)}</div>
+                <div class="item-gst">${row.gstRate || ''}%</div>
             </div>`).join("\n")
     rendered = rendered.replace(/{{\s*itemsRowsMinimal\s*}}/g, rowsMinimal)
   }
@@ -37,7 +92,24 @@ async function renderTemplateToHtml(templateKey: string, data: any): Promise<str
   for (const [key, value] of flatEntries) {
     if (key === 'itemsRows') continue
     const token = new RegExp(`{{\\s*${key}\\s*}}`, "g")
-    rendered = rendered.replace(token, String(value ?? ""))
+    
+    // If value is null, undefined, or empty string, replace with empty string
+    if (value == null || value === "") {
+      rendered = rendered.replace(token, "")
+    } else {
+      // Handle special cases with labels
+      let displayValue = String(value)
+      if (key === 'companyGSTIN' && value) {
+        displayValue = `GSTIN: ${value}`
+      } else if (key === 'companyPhone' && value) {
+        displayValue = `Phone: ${value}`
+      } else if (key === 'companyEmail' && value) {
+        displayValue = `Email: ${value}`
+      } else if (key === 'clientGSTIN' && value) {
+        displayValue = `GSTIN: ${value}`
+      }
+      rendered = rendered.replace(token, displayValue)
+    }
   }
   return rendered
 }
@@ -50,7 +122,27 @@ async function generatePdfFromHtml(html: string): Promise<Buffer> {
   try {
     const page = await browser.newPage()
     await page.setContent(html, { waitUntil: "networkidle0" })
-    const pdf = await page.pdf({ format: "A4", printBackground: true })
+    
+    // Get the content height to determine if we need to adjust page size
+    const contentHeight = await page.evaluate(() => {
+      return Math.max(
+        document.body.scrollHeight,
+        document.body.offsetHeight,
+        document.documentElement.clientHeight,
+        document.documentElement.scrollHeight,
+        document.documentElement.offsetHeight
+      )
+    })
+    
+    // Calculate page height in mm (A4 width is 210mm)
+    const pageHeight = Math.max(297, Math.ceil(contentHeight * 0.264583)) // Convert px to mm
+    
+    const pdf = await page.pdf({ 
+      format: "A4", 
+      printBackground: true,
+      height: `${pageHeight}mm`,
+      width: "210mm"
+    })
     return Buffer.from(pdf)
   } finally {
     await browser.close()
@@ -174,22 +266,48 @@ export async function POST(request: NextRequest) {
       include: { client: true, items: true },
     })
 
+    // Get business information
+    const business = await prisma.business.findUnique({ where: { userId: user.id } })
+    
+    // Calculate individual tax amounts
+    const cgstAmount = subtotal * (cgst / 100)
+    const sgstAmount = subtotal * (sgst / 100)
+    const igstAmount = subtotal * (igst / 100)
+    const roundOff = Math.round(totalAmount) - totalAmount
+
     // Prepare HTML data
     const htmlData = {
       invoiceNo: `${created.invoiceNo}`,
       date: created.date.toISOString().slice(0, 10),
+      generationDate: new Date().toISOString().slice(0, 10),
       clientName: created.client.name,
       clientAddress: created.client.address || "",
-      companyName: "BillCraft",
-      companyAddress: "",
-      companyCityState: "",
+      clientGSTIN: created.client.gstNumber || "",
+      companyName: business?.name || "BillCraft",
+      companyGSTIN: business?.gstNumber || "",
+      companyAddress: business?.address || "",
+      companyCityState: business?.state || "",
       companyPhone: "",
       companyEmail: "",
       subtotal: subtotal.toFixed(2),
-      taxAmount: taxAmount.toFixed(2),
+      cgstRate: cgst.toFixed(1),
+      cgstAmount: cgstAmount.toFixed(2),
+      sgstRate: sgst.toFixed(1),
+      sgstAmount: sgstAmount.toFixed(2),
+      igstRate: igst.toFixed(1),
+      igstAmount: igstAmount.toFixed(2),
+      roundOff: roundOff.toFixed(2),
       total: totalAmount.toFixed(2),
+      amountInWords: numberToWords(Math.round(totalAmount)),
       note: created.note || "",
-      itemsRows: created.items.map((it) => ({ description: it.description, quantity: it.quantity, rate: it.price, amount: it.amount }))
+      itemsRows: created.items.map((it, index) => ({ 
+        srNo: index + 1,
+        description: it.description, 
+        quantity: it.quantity, 
+        rate: it.price, 
+        amount: it.amount,
+        gstRate: it.gstRate.toFixed(1)
+      }))
     }
     const html = await renderTemplateToHtml(templateKey, htmlData)
     const pdfBuffer = await generatePdfFromHtml(html)
@@ -254,16 +372,52 @@ export async function PUT(request: NextRequest) {
 
     if (action === "regeneratePdf") {
       let templateKey = invoice.template?.pdfTemplate || "classic"
+      
+      // Get business information
+      const business = await prisma.business.findUnique({ where: { userId: user.id } })
+      
+      // Calculate individual tax amounts
+      const cgst = invoice.useManualGst ? (invoice.manualCgst || 0) : (invoice.template?.cgstRate || 0)
+      const sgst = invoice.useManualGst ? (invoice.manualSgst || 0) : (invoice.template?.sgstRate || 0)
+      const igst = invoice.useManualGst ? (invoice.manualIgst || 0) : (invoice.template?.igstRate || 0)
+      
+      const cgstAmount = invoice.amount * (cgst / 100)
+      const sgstAmount = invoice.amount * (sgst / 100)
+      const igstAmount = invoice.amount * (igst / 100)
+      const roundOff = Math.round(invoice.totalAmount) - invoice.totalAmount
+      
       const htmlData = {
         invoiceNo: `${invoice.invoiceNo}`,
         date: invoice.date.toISOString().slice(0, 10),
+        generationDate: new Date().toISOString().slice(0, 10),
         clientName: invoice.client.name,
         clientAddress: invoice.client.address || "",
+        clientGSTIN: invoice.client.gstNumber || "",
+        companyName: business?.name || "BillCraft",
+        companyGSTIN: business?.gstNumber || "",
+        companyAddress: business?.address || "",
+        companyCityState: business?.state || "",
+        companyPhone: "",
+        companyEmail: "",
         subtotal: invoice.amount.toFixed(2),
-        taxAmount: invoice.taxAmount.toFixed(2),
+        cgstRate: cgst.toFixed(1),
+        cgstAmount: cgstAmount.toFixed(2),
+        sgstRate: sgst.toFixed(1),
+        sgstAmount: sgstAmount.toFixed(2),
+        igstRate: igst.toFixed(1),
+        igstAmount: igstAmount.toFixed(2),
+        roundOff: roundOff.toFixed(2),
         total: invoice.totalAmount.toFixed(2),
+        amountInWords: numberToWords(Math.round(invoice.totalAmount)),
         note: invoice.note || "",
-        itemsRows: invoice.items.map((it) => ({ description: it.description, quantity: it.quantity, rate: it.price, amount: it.amount }))
+        itemsRows: invoice.items.map((it, index) => ({ 
+          srNo: index + 1,
+          description: it.description, 
+          quantity: it.quantity, 
+          rate: it.price, 
+          amount: it.amount,
+          gstRate: it.gstRate.toFixed(1)
+        }))
       }
       const html = await renderTemplateToHtml(templateKey, htmlData)
       const pdfBuffer = await generatePdfFromHtml(html)

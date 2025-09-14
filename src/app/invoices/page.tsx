@@ -15,7 +15,7 @@ export default function InvoicesPage() {
   const [error, setError] = useState<string | null>(null)
   const [invoices, setInvoices] = useState<any[]>([])
   const [filterText, setFilterText] = useState("")
-  const [statusFilter] = useState<string>("All")
+  const [statusFilter, setStatusFilter] = useState<string>("All")
   const [clients, setClients] = useState<any[]>([])
   const [clientFilter, setClientFilter] = useState<string>("All")
   const [showNewInvoice, setShowNewInvoice] = useState(false)
@@ -43,8 +43,27 @@ export default function InvoicesPage() {
       inv.client?.name?.toLowerCase()?.includes(text) ||
       inv.client?.gstNumber?.toLowerCase()?.includes(text)
     const matchesClient = clientFilter === "All" || inv.clientId === clientFilter
-    // status is derived: Paid/Pending/Overdue not implemented server-side yet
-    return matchesText && matchesClient
+    
+    // Status filtering logic
+    let matchesStatus = true
+    if (statusFilter !== "All") {
+      const invoiceStatus = inv.status || "UNPAID"
+      
+      if (statusFilter === "Paid") {
+        matchesStatus = invoiceStatus === "PAID"
+      } else if (statusFilter === "Unpaid") {
+        matchesStatus = invoiceStatus === "UNPAID"
+      }
+    }
+    
+    const result = matchesText && matchesClient && matchesStatus
+    
+    // Debug logging
+    if (statusFilter !== "All") {
+      console.log(`Invoice ${inv.invoiceNo}: status=${inv.status}, matchesStatus=${matchesStatus}, result=${result}`)
+    }
+    
+    return result
   })
 
   async function handleDelete(id: string) {
@@ -80,11 +99,14 @@ export default function InvoicesPage() {
               />
             </div>
             <div className="relative">
-              <select className="appearance-none px-4 py-2 pr-12 border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                <option>All Status</option>
-                <option>Paid</option>
-                <option>Pending</option>
-                <option>Overdue</option>
+              <select 
+                value={statusFilter} 
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="appearance-none px-4 py-2 pr-12 border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              >
+                <option value="All">All Status</option>
+                <option value="Paid">Paid</option>
+                <option value="Unpaid">Unpaid</option>
               </select>
               <svg className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />

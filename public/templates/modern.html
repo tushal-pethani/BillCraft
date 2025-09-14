@@ -1,278 +1,133 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Modern Invoice Template Preview</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            padding: 20px;
-            min-height: 100vh;
-        }
-        
-        .invoice-container {
-            max-width: 800px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 16px;
-            overflow: hidden;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-        }
-        
-        .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 40px;
-            text-align: center;
-        }
-        
-        .company-name {
-            font-size: 32px;
-            font-weight: 300;
-            margin-bottom: 10px;
-            letter-spacing: 1px;
-        }
-        
-        .company-details {
-            opacity: 0.9;
-            font-size: 14px;
-            line-height: 1.8;
-        }
-        
-        .content {
-            padding: 40px;
-        }
-        
-        .invoice-title {
-            font-size: 28px;
-            font-weight: 300;
-            color: #333;
-            margin-bottom: 30px;
-            text-align: center;
-            position: relative;
-        }
-        
-        .invoice-title::after {
-            content: '';
-            position: absolute;
-            bottom: -10px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 60px;
-            height: 3px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-radius: 2px;
-        }
-        
-        .invoice-details {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 40px;
-            margin-bottom: 40px;
-        }
-        
-        .info-section h3 {
-            color: #667eea;
-            font-size: 18px;
-            font-weight: 600;
-            margin-bottom: 15px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-        
-        .info-section p {
-            margin: 8px 0;
-            color: #666;
-            font-size: 14px;
-            line-height: 1.6;
-        }
-        
-        .items-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 40px 0;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
-        
-        .items-table th {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 20px 15px;
-            text-align: left;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            font-size: 12px;
-        }
-        
-        .items-table td {
-            padding: 20px 15px;
-            border-bottom: 1px solid #f0f0f0;
-            color: #333;
-        }
-        
-        .items-table tr:nth-child(even) {
-            background-color: #fafafa;
-        }
-        
-        .items-table tr:hover {
-            background-color: #f5f5f5;
-        }
-        
-        .totals {
-            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-            padding: 30px;
-            border-radius: 12px;
-            margin-top: 30px;
-        }
-        
-        .total-row {
-            display: flex;
-            justify-content: space-between;
-            margin: 12px 0;
-            padding: 8px 0;
-            border-bottom: 1px solid #e0e0e0;
-        }
-        
-        .total-label {
-            font-weight: 500;
-            color: #666;
-        }
-        
-        .total-amount {
-            font-weight: 600;
-            color: #333;
-        }
-        
-        .grand-total {
-            font-size: 20px;
-            font-weight: 700;
-            color: #667eea;
-            border-top: 2px solid #667eea;
-            padding-top: 15px;
-            margin-top: 15px;
-        }
-        
-        .payment-terms {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 25px;
-            border-radius: 12px;
-            margin: 30px 0;
-        }
-        
-        .payment-terms h4 {
-            margin-bottom: 15px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-        
-        .payment-terms p {
-            opacity: 0.9;
-            line-height: 1.6;
-        }
-        
-        .footer {
-            text-align: center;
-            color: #999;
-            font-size: 14px;
-            margin-top: 40px;
-            padding-top: 30px;
-            border-top: 1px solid #f0f0f0;
-        }
-        
-        .status-badge {
-            display: inline-block;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 20px;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GST Invoice Template</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Times New Roman', serif; background: #f8f9fa; padding: 20px; }
+    .invoice-container {
+      max-width: 900px; margin: auto; background: #fff; padding: 40px;
+      border-radius: 8px; box-shadow: 0 0 15px rgba(0,0,0,0.1);
+    }
+    .header { border-bottom: 3px solid #2c3e50; padding-bottom: 15px; margin-bottom: 20px; text-align: right; }
+    .company-name { font-size: 26px; font-weight: bold; color: #2c3e50; }
+    .company-details { font-size: 14px; color: #555; line-height: 1.5; margin-top: 8px; max-width: 300px; margin-left: auto; }
+    .invoice-title { text-align: center; font-size: 22px; font-weight: bold; margin: 20px 0; text-transform: uppercase; letter-spacing: 1.5px; }
+    .invoice-details { display: flex; justify-content: space-between; margin-bottom: 20px; gap: 30px; }
+    .info-section { flex: 1; min-width: 0; }
+    .info-section h3 { font-size: 15px; margin-bottom: 8px; color: #2c3e50; border-bottom: 1px solid #ddd; padding-bottom: 5px; }
+    .info-section p { font-size: 14px; color: #444; margin: 4px 0; word-wrap: break-word; }
+    table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+    table th, table td { border: 1px solid #ddd; padding: 10px; font-size: 14px; }
+    table th { background: #2c3e50; color: #fff; text-align: center; }
+    table td { text-align: center; }
+    .totals { margin-top: 15px; text-align: right; }
+    .total-row { display: flex; justify-content: flex-end; margin: 5px 0; }
+    .total-label { width: 200px; font-weight: bold; margin-right: 20px; text-align: right; }
+    .total-amount { width: 120px; text-align: right; }
+    .grand-total { font-size: 18px; font-weight: bold; color: #2c3e50; border-top: 2px solid #2c3e50; padding-top: 10px; margin-top: 10px; }
+    .amount-words { margin-top: 10px; font-size: 14px; color: #444; font-style: italic; }
+    .terms { margin-top: 30px; font-size: 13px; color: #555; }
+    .terms h4 { margin-bottom: 8px; font-size: 15px; color: #2c3e50; }
+    .footer { margin-top: 40px; text-align: center; font-size: 12px; color: #666; border-top: 1px solid #ddd; padding-top: 15px; }
+    .signatory { margin-top: 40px; text-align: right; font-size: 14px; font-weight: bold; }
+  </style>
 </head>
 <body>
-    <div class="invoice-container">
-        <div class="header">
-            <div class="company-name">{{companyName}}</div>
-            <div class="company-details">
-                {{companyAddress}} • {{companyCityState}}<br>
-                Phone: {{companyPhone}} • Email: {{companyEmail}}
-            </div>
-        </div>
-        
-        <div class="content">
-            <div class="status-badge">Invoice</div>
-            
-            <div class="invoice-title">Invoice</div>
-            
-            <div class="invoice-details">
-                <div class="info-section">
-                    <h3>Invoice Details</h3>
-                    <p><strong>Invoice #:</strong> {{invoiceNo}}</p>
-                    <p><strong>Date:</strong> {{date}}</p>
-                </div>
-                <div class="info-section">
-                    <h3>Bill To</h3>
-                    <p><strong>{{clientName}}</strong></p>
-                    <p>{{clientAddress}}</p>
-                </div>
-            </div>
-            
-            <table class="items-table">
-                <thead>
-                    <tr>
-                        <th>Description</th>
-                        <th>Quantity</th>
-                        <th>Rate</th>
-                        <th>Amount</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {{itemsRows}}
-                </tbody>
-            </table>
-            
-            <div class="totals">
-                <div class="total-row">
-                    <div class="total-label">Subtotal:</div>
-                    <div class="total-amount">₹{{subtotal}}</div>
-                </div>
-                <div class="total-row">
-                    <div class="total-label">Tax:</div>
-                    <div class="total-amount">₹{{taxAmount}}</div>
-                </div>
-                <div class="total-row grand-total">
-                    <div class="total-label">Total:</div>
-                    <div class="total-amount">₹{{total}}</div>
-                </div>
-            </div>
-            
-            <div class="payment-terms">
-                <h4>Payment Terms</h4>
-                <p>Payment is due within 30 days of invoice date. Late payments may be subject to a 1.5% monthly service charge.</p>
-            </div>
-            
-            <div class="footer">
-                <p>Thank you for your business!</p>
-                <p>Generated on {{date}}</p>
-            </div>
-        </div>
+  <div class="invoice-container">
+    <div class="header">
+      <div class="company-name">{{companyName}}</div>
+      <div class="company-details">
+        {{companyGSTIN}}<br>
+        {{companyAddress}}<br>
+        {{companyCityState}}<br>
+        {{companyPhone}}<br>
+        {{companyEmail}}
+      </div>
     </div>
+
+    <div class="invoice-title">Tax Invoice</div>
+
+    <div class="invoice-details">
+      <div class="info-section">
+        <h3>Invoice Details</h3>
+        <p><strong>Invoice No:</strong> {{invoiceNo}}</p>
+        <p><strong>Date:</strong> {{date}}</p>
+      </div>
+      <div class="info-section">
+        <h3>Bill To</h3>
+        <p><strong>{{clientName}}</strong></p>
+        <p>{{clientAddress}}</p>
+        <p>{{clientGSTIN}}</p>
+      </div>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Sr No</th>
+          <th>Product Name</th>
+          <th>Qty</th>
+          <th>Rate</th>
+          <th>Amount</th>
+          <th>GST %</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{itemsRows}}
+      </tbody>
+    </table>
+
+    <div class="totals">
+      <div class="total-row">
+        <div class="total-label">Subtotal:</div>
+        <div class="total-amount">₹{{subtotal}}</div>
+      </div>
+      <div class="total-row">
+        <div class="total-label">CGST ({{cgstRate}}%):</div>
+        <div class="total-amount">₹{{cgstAmount}}</div>
+      </div>
+      <div class="total-row">
+        <div class="total-label">SGST ({{sgstRate}}%):</div>
+        <div class="total-amount">₹{{sgstAmount}}</div>
+      </div>
+      <div class="total-row">
+        <div class="total-label">IGST ({{igstRate}}%):</div>
+        <div class="total-amount">₹{{igstAmount}}</div>
+      </div>
+      <div class="total-row">
+        <div class="total-label">Round Off:</div>
+        <div class="total-amount">₹{{roundOff}}</div>
+      </div>
+      <div class="total-row grand-total">
+        <div class="total-label">Total:</div>
+        <div class="total-amount">₹{{total}}</div>
+      </div>
+    </div>
+
+    <div class="amount-words">
+      Bill Amount (in words): {{amountInWords}}
+    </div>
+
+    <div class="terms">
+      <h4>Terms & Conditions</h4>
+      <p>1. Goods once sold will not be taken back.</p>
+      <p>2. Interest @18% p.a. will be charged if payment is not made within due date.</p>
+      <p>3. Our risk and responsibility ceases as soon as the goods leave our premises.</p>
+      <p>4. E.&O.E.</p>
+    </div>
+
+    <div class="signatory">
+      For, {{companyName}} <br>
+      (Authorised Signatory)
+    </div>
+
+    <div class="footer">
+      <p>Thank you for your business!</p>
+      <p>Generated on {{generationDate}}</p>
+    </div>
+  </div>
 </body>
 </html>

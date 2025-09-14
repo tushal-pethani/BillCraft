@@ -163,15 +163,16 @@
 <body>
     <div class="invoice-container">
         <div class="header">
-            <div class="company-info">
-                <div class="company-name">{{companyName}}</div>
-                <div class="company-details">
-                    {{companyAddress}}<br>
-                    {{companyCityState}}<br>
-                    {{companyPhone}}<br>
-                    {{companyEmail}}
-                </div>
+        <div class="company-info">
+            <div class="company-name">{{companyName}}</div>
+            <div class="company-details">
+                {{companyGSTIN}}<br>
+                {{companyAddress}}<br>
+                {{companyCityState}}<br>
+                {{companyPhone}}<br>
+                {{companyEmail}}
             </div>
+        </div>
         </div>
         
         <div class="invoice-title">Invoice</div>
@@ -189,6 +190,7 @@
                     <h3>Bill To</h3>
                     <p><strong>{{clientName}}</strong></p>
                     <p>{{clientAddress}}</p>
+                    <p>{{clientGSTIN}}</p>
                 </div>
             </div>
         </div>
@@ -196,10 +198,12 @@
         <table class="items-table">
             <thead>
                 <tr>
+                    <th>Sr No</th>
                     <th>Description</th>
                     <th>Quantity</th>
                     <th>Rate</th>
                     <th>Amount</th>
+                    <th>GST %</th>
                 </tr>
             </thead>
             <tbody>
@@ -213,8 +217,16 @@
                 <div class="total-amount">₹{{subtotal}}</div>
             </div>
             <div class="total-row">
-                <div class="total-label">Tax:</div>
-                <div class="total-amount">₹{{taxAmount}}</div>
+                <div class="total-label">CGST ({{cgstRate}}%):</div>
+                <div class="total-amount">₹{{cgstAmount}}</div>
+            </div>
+            <div class="total-row">
+                <div class="total-label">SGST ({{sgstRate}}%):</div>
+                <div class="total-amount">₹{{sgstAmount}}</div>
+            </div>
+            <div class="total-row">
+                <div class="total-label">IGST ({{igstRate}}%):</div>
+                <div class="total-amount">₹{{igstAmount}}</div>
             </div>
             <div class="total-row grand-total">
                 <div class="total-label">Total:</div>
@@ -229,7 +241,7 @@
         
         <div class="footer">
             <p>Thank you for your business!</p>
-            <p>Generated on {{date}}</p>
+            <p>Generated on {{generationDate}}</p>
         </div>
     </div>
 </body>
