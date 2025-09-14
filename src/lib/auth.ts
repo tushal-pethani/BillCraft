@@ -44,7 +44,7 @@ export const authOptions = {
     signIn: "/login", // custom login page
   },
   callbacks: {
-    async redirect({ url, baseUrl }) {
+    async redirect({ url, baseUrl }: { url: string; baseUrl: string }) {
       // Force authenticated users to the dashboard unless an explicit safe relative path is provided
       try {
         const parsed = new URL(url, baseUrl)
@@ -61,7 +61,7 @@ export const authOptions = {
       // Fallback
       return `${baseUrl}/dashboard`
     },
-    async session({ session, token }) {
+    async session({ session, token }: { session: any; token: any }) {
       if (token.sub) {
         session.user.id = token.sub;
       }
