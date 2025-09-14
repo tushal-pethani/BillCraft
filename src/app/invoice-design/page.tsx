@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
+import { useTemplates, optimisticDeleteTemplate } from "@/lib/data-hooks"
 // Removed local AppLayout to use GlobalNavbar layout
 
 interface InvoiceTemplate {
@@ -29,7 +30,6 @@ interface InvoiceTemplate {
 export default function InvoiceDesignPage() {
   const { data: session } = useSession()
   const router = useRouter()
-  const [templates, setTemplates] = useState<InvoiceTemplate[]>([])
   const [showCreateForm, setShowCreateForm] = useState(false)
   const [loading, setLoading] = useState(false)
   const [showPreview, setShowPreview] = useState(false)
@@ -42,22 +42,8 @@ export default function InvoiceDesignPage() {
     return null
   }
 
-  // Load templates on component mount
-  useEffect(() => {
-    loadTemplates()
-  }, [])
-
-  const loadTemplates = async () => {
-    try {
-      const response = await fetch('/api/templates')
-      if (response.ok) {
-        const data = await response.json()
-        setTemplates(data.templates || [])
-      }
-    } catch (error) {
-      console.error('Failed to load templates:', error)
-    }
-  }
+  // Use optimized data hooks with caching
+  const { templates, isLoading: templatesLoading, mutate: mutateTemplates } = useTemplates()
 
   const showTemplatePreview = (templateId: string) => {
     setPreviewTemplate(templateId)
@@ -66,19 +52,11 @@ export default function InvoiceDesignPage() {
 
   const deleteTemplate = async (templateId: string) => {
     try {
-      const response = await fetch(`/api/templates?id=${templateId}`, {
-        method: 'DELETE'
-      })
-
-      if (response.ok) {
-        loadTemplates() // Reload templates to update the UI
-        setDeletingTemplate(null) // Close confirmation dialog
-      } else {
-        const data = await response.json()
-        console.error('Failed to delete template:', data.error)
-      }
+      await optimisticDeleteTemplate(templateId)
+      setDeletingTemplate(null) // Close confirmation dialog
     } catch (error) {
       console.error('Error deleting template:', error)
+      alert('Failed to delete template')
     }
   }
 
@@ -185,7 +163,7 @@ export default function InvoiceDesignPage() {
                   onClose={() => setShowCreateForm(false)}
                   onSuccess={() => {
                     setShowCreateForm(false)
-                    loadTemplates()
+                    mutateTemplates()
                   }}
                 />
               </div>
@@ -259,7 +237,7 @@ export default function InvoiceDesignPage() {
                   onClose={() => setEditingTemplate(null)}
                   onSuccess={() => {
                     setEditingTemplate(null)
-                    loadTemplates()
+                    mutateTemplates()
                   }}
                 />
               </div>

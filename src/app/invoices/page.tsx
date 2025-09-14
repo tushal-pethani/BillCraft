@@ -4,19 +4,15 @@ import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import DarkModeToggle from "@/app/components/DarkModeToggle"
-import { useEffect, useState } from "react"
-import useSWR from 'swr'
+import { useState } from "react"
 import NewInvoiceForm from "@/app/components/NewInvoiceForm"
+import { useInvoices, useClients, optimisticUpdateInvoice, optimisticDeleteInvoice } from "@/lib/data-hooks"
 
 export default function InvoicesPage() {
   const { data: session } = useSession()
   const router = useRouter()
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const [invoices, setInvoices] = useState<any[]>([])
   const [filterText, setFilterText] = useState("")
   const [statusFilter, setStatusFilter] = useState<string>("All")
-  const [clients, setClients] = useState<any[]>([])
   const [clientFilter, setClientFilter] = useState<string>("All")
   const [showNewInvoice, setShowNewInvoice] = useState(false)
   const [previewInvoiceId, setPreviewInvoiceId] = useState<string | null>(null)
@@ -26,15 +22,12 @@ export default function InvoicesPage() {
     return null
   }
 
-  const { data: invoicesData, isLoading: invoicesLoading, error: invoicesError } = useSWR('/api/invoices')
-  const { data: clientsData, isLoading: clientsLoading } = useSWR('/api/clients')
-
-  useEffect(() => {
-    if (invoicesData) setInvoices(invoicesData.invoices || [])
-    if (clientsData) setClients(clientsData.clients || [])
-    setLoading(invoicesLoading || clientsLoading)
-    setError(invoicesError ? (invoicesError as any).message : null)
-  }, [invoicesData, clientsData, invoicesLoading, clientsLoading, invoicesError])
+  // Use optimized data hooks with caching
+  const { invoices, isLoading: invoicesLoading, error: invoicesError } = useInvoices()
+  const { clients, isLoading: clientsLoading } = useClients()
+  
+  const loading = invoicesLoading || clientsLoading
+  const error = invoicesError ? (invoicesError as any).message : null
 
   const filtered = invoices.filter((inv) => {
     const text = filterText.toLowerCase()
@@ -66,14 +59,33 @@ export default function InvoicesPage() {
     return result
   })
 
+  // Function to highlight matching text
+  function highlightText(text: string, searchTerm: string) {
+    if (!searchTerm || !text) return text
+    
+    const regex = new RegExp(`(${searchTerm})`, 'gi')
+    const parts = text.split(regex)
+    
+    return parts.map((part, index) => {
+      if (regex.test(part)) {
+        return (
+          <span key={index} className="bg-yellow-200 dark:bg-yellow-800 px-1 rounded">
+            {part}
+          </span>
+        )
+      }
+      return part
+    })
+  }
+
   async function handleDelete(id: string) {
     const ok = confirm("Delete this invoice?")
     if (!ok) return
-    const res = await fetch(`/api/invoices?id=${id}`, { method: "DELETE" })
-    if (res.ok) {
-      setInvoices((prev) => prev.filter((i) => i.id !== id))
-    } else {
-      alert("Failed to delete")
+    
+    try {
+      await optimisticDeleteInvoice(id)
+    } catch (error) {
+      alert("Failed to delete invoice")
     }
   }
 
@@ -163,11 +175,17 @@ export default function InvoicesPage() {
                 {!loading && !error && filtered.map((inv: any) => (
                   <tr key={inv.id}>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-gray-900 dark:text-gray-100">#{inv.invoiceNo}</div>
+                      <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                        #{highlightText(String(inv.invoiceNo), filterText)}
+                      </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900 dark:text-gray-100">{inv.client?.name}</div>
-                      <div className="text-sm text-gray-500 dark:text-gray-400">{inv.client?.gstNumber}</div>
+                      <div className="text-sm text-gray-900 dark:text-gray-100">
+                        {highlightText(inv.client?.name || '', filterText)}
+                      </div>
+                      <div className="text-sm text-gray-500 dark:text-gray-400">
+                        {highlightText(inv.client?.gstNumber || '', filterText)}
+                      </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{new Date(inv.date).toISOString().slice(0,10)}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
@@ -184,9 +202,10 @@ export default function InvoicesPage() {
                       <button onClick={() => router.push(`/invoices/${inv.id}?edit=1`)} className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white mr-3">Edit</button>
                       {inv.status !== 'PAID' && (
                         <button onClick={async () => {
-                          const res = await fetch('/api/invoices', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: inv.id, action: 'markPaid' }) })
-                          if (res.ok) {
-                            setInvoices(prev => prev.map(i => i.id === inv.id ? { ...i, status: 'PAID' } : i))
+                          try {
+                            await optimisticUpdateInvoice(inv.id, { action: 'markPaid' })
+                          } catch (error) {
+                            alert("Failed to mark invoice as paid")
                           }
                         }} className="text-green-600 hover:text-green-900 mr-3">Mark Paid</button>
                       )}

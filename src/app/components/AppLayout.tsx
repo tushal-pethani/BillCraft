@@ -95,10 +95,10 @@ export default function AppLayout({ children, pageTitle, pageDescription }: AppL
             </div>
             <div className="flex items-center space-x-4">
               {/* Dark Mode Toggle */}
-              <DarkModeToggle />
+              {/* <DarkModeToggle /> */}
               
               {/* Profile Button */}
-              <div className="relative">
+              {/* <div className="relative">
                 <button className="flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
                   <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
                     <span className="text-white text-sm font-medium">
@@ -112,7 +112,7 @@ export default function AppLayout({ children, pageTitle, pageDescription }: AppL
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                   </svg>
                 </button>
-              </div>
+              </div> */}
             </div>
           </div>
         </div>

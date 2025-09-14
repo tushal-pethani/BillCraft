@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
+import { useClients, useBusiness, optimisticDeleteClient } from "@/lib/data-hooks"
 // Removed local AppLayout to use GlobalNavbar layout
 
 interface Client {
@@ -19,51 +20,22 @@ interface Client {
 export default function ClientsPage() {
   const { data: session } = useSession()
   const router = useRouter()
-  const [clients, setClients] = useState<Client[]>([])
   const [showAddForm, setShowAddForm] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [gstNumber, setGstNumber] = useState('')
   const [deletingClient, setDeletingClient] = useState<Client | null>(null)
-  const [hasBusiness, setHasBusiness] = useState<boolean | null>(null)
 
   if (!session) {
     router.push("/") // redirect to signup/login if not logged in
     return null
   }
 
-  // Load clients and check business status on component mount
-  useEffect(() => {
-    loadClients()
-    checkBusinessStatus()
-  }, [])
-
-  const checkBusinessStatus = async () => {
-    try {
-      const response = await fetch('/api/business')
-      if (response.ok) {
-        const data = await response.json()
-        setHasBusiness(!!data.business)
-      } else {
-        setHasBusiness(false)
-      }
-    } catch (error) {
-      console.error('Failed to check business status:', error)
-      setHasBusiness(false)
-    }
-  }
-
-  const loadClients = async () => {
-    try {
-      const response = await fetch('/api/clients')
-      if (response.ok) {
-        const data = await response.json()
-        setClients(data.clients || [])
-      }
-    } catch (error) {
-      console.error('Failed to load clients:', error)
-    }
-  }
+  // Use optimized data hooks with caching
+  const { clients, isLoading: clientsLoading, mutate: mutateClients } = useClients()
+  const { business, isLoading: businessLoading } = useBusiness()
+  
+  const hasBusiness = business !== null
 
   const handleAddClient = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -87,8 +59,7 @@ export default function ClientsPage() {
       if (response.ok) {
         setGstNumber('')
         setShowAddForm(false)
-        loadClients()
-        checkBusinessStatus() // Refresh business status
+        mutateClients() // Refresh clients cache
       } else {
         setError(data.error || 'Failed to add client')
       }
@@ -102,19 +73,11 @@ export default function ClientsPage() {
 
   const deleteClient = async (clientId: string) => {
     try {
-      const response = await fetch(`/api/clients?id=${clientId}`, {
-        method: 'DELETE'
-      })
-
-      if (response.ok) {
-        loadClients()
-        setDeletingClient(null)
-      } else {
-        const data = await response.json()
-        console.error('Failed to delete client:', data.error)
-      }
+      await optimisticDeleteClient(clientId)
+      setDeletingClient(null)
     } catch (error) {
       console.error('Error deleting client:', error)
+      alert('Failed to delete client')
     }
   }
 

@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
+import { useClients, useTemplates, invalidateInvoices } from "@/lib/data-hooks"
 
 type Client = { id: string; name: string; gstNumber?: string | null }
 type Template = { id: string; name: string; pdfTemplate: string; isTaxable: boolean; cgstRate?: number | null; sgstRate?: number | null; igstRate?: number | null }
@@ -9,8 +10,6 @@ type ItemRow = { name: string; quantity: number; rate: number }
 
 export default function NewInvoiceForm({ onCreated, onCancel }: { onCreated?: (invoiceId: string)=>void, onCancel?: ()=>void }) {
   const router = useRouter()
-  const [clients, setClients] = useState<Client[]>([])
-  const [templates, setTemplates] = useState<Template[]>([])
   const [date, setDate] = useState<string>(() => new Date().toISOString().slice(0,10))
   const [clientId, setClientId] = useState<string>("")
   const [templateId, setTemplateId] = useState<string>("")
@@ -23,22 +22,9 @@ export default function NewInvoiceForm({ onCreated, onCancel }: { onCreated?: (i
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  useEffect(() => {
-    ;(async () => {
-      const [clientsRes, templatesRes] = await Promise.all([
-        fetch("/api/clients"),
-        fetch("/api/templates"),
-      ])
-      if (clientsRes.ok) {
-        const data = await clientsRes.json()
-        setClients(data.clients || [])
-      }
-      if (templatesRes.ok) {
-        const data = await templatesRes.json()
-        setTemplates(data.templates || [])
-      }
-    })()
-  }, [])
+  // Use optimized data hooks with caching
+  const { clients } = useClients()
+  const { templates } = useTemplates()
 
   const subtotal = useMemo(() => items.reduce((s, it) => s + Number(it.quantity || 0) * Number(it.rate || 0), 0), [items])
   const gstRates = useMemo(() => {
@@ -81,6 +67,7 @@ export default function NewInvoiceForm({ onCreated, onCancel }: { onCreated?: (i
       })
       if (!res.ok) throw new Error("Failed to create invoice")
       const data = await res.json()
+      invalidateInvoices() // Refresh invoices cache
       onCreated ? onCreated(data.invoice.id) : router.push(`/invoices/${data.invoice.id}`)
     } catch (e: any) {
       setError(e.message || "Error creating invoice")
