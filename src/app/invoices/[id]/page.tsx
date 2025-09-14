@@ -6,7 +6,7 @@ import { useRouter, useSearchParams, useParams } from "next/navigation"
 export default function InvoiceDetailPage() {
   const router = useRouter()
   const search = useSearchParams()
-  const params = useParams()  // <-- get id from the URL dynamically
+  const params = useParams()   // <-- dynamically get the [id]
   const id = params?.id
 
   const [loading, setLoading] = useState(true)
@@ -32,13 +32,15 @@ export default function InvoiceDetailPage() {
       }
     })()
   }, [id])
-
-  function onPrint() {
+  
+  const onPrint = () => {
     const iframe = iframeRef.current
     if (!iframe) return
     iframe.contentWindow?.focus()
     iframe.contentWindow?.print()
   }
+
+  if (!id) return <div>Invoice ID not found</div>
 
   return (
     <div className="p-6 max-w-5xl mx-auto">
